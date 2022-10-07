@@ -408,6 +408,11 @@ class _DocumentMouseInteractorState extends State<DocumentMouseInteractor>
     if (_panGestureDevice == PointerDeviceKind.trackpad) {
       // The user ended a pan gesture with two fingers on a trackpad.
       // We already scrolled the document.
+      final pos = widget.autoScroller.getScrollPosition();
+      if (pos is ScrollPositionWithSingleContext) {
+        pos.goBallistic(-details.velocity.pixelsPerSecond.dy);
+        pos.context.setIgnorePointer(false);
+      }
       return;
     }
     _onDragEnd();
@@ -577,6 +582,15 @@ Updating drag selection:
   Widget build(BuildContext context) {
     return Listener(
       onPointerSignal: _scrollOnMouseWheel,
+      // Workaround for Flutter 3.3 (no PointerScrollInertiaCancelEvent)
+      onPointerHover: (event) {
+        final pos = widget.autoScroller.getScrollPosition();
+        if (pos is ScrollPositionWithSingleContext) {
+          if (pos.pixels < pos.maxScrollExtent && pos.pixels > pos.minScrollExtent) {
+            pos.goIdle();
+          }
+        }
+      },
       child: _buildCursorStyle(
         child: _buildGestureInput(
           child: _buildDocumentContainer(

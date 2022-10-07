@@ -360,6 +360,8 @@ class AutoScrollController with ChangeNotifier {
     );
   }
 
+  ScrollPosition? getScrollPosition() => _getScrollPosition?.call();
+
   /// Immediately changes the attached [Scrollable]'s scroll offset so that all
   /// of the given [globalRegion] is visible.
   void ensureGlobalRectIsVisible(Rect globalRegion) {
